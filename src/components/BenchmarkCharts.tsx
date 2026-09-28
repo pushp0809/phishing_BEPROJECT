@@ -30,11 +30,12 @@ const combinedROC = rocModels[0].data.map((d, i) => ({
 }));
 
 const benchmarkTable = [
-  { model: 'TypeNet (LSTM)', accuracy: 97.2, precision: 96.8, recall: 97.5, f1: 97.1, eer: 3.2, latency: 4.2 },
+  { model: 'TypeNet (Keystroke only)', accuracy: 97.2, precision: 96.8, recall: 97.5, f1: 97.1, eer: 3.2, latency: 4.2 },
+  { model: 'Mouse Dynamics only', accuracy: 94.5, precision: 93.8, recall: 94.1, f1: 93.9, eer: 5.1, latency: 3.8 },
+  { model: 'TypeNet + Mouse (Fused)', accuracy: 98.7, precision: 98.4, recall: 98.9, f1: 98.6, eer: 1.8, latency: 5.1 },
   { model: 'Random Forest', accuracy: 91.4, precision: 90.2, recall: 88.7, f1: 89.4, eer: 7.8, latency: 1.1 },
   { model: 'SVM (RBF)', accuracy: 93.1, precision: 92.5, recall: 91.8, f1: 92.1, eer: 6.1, latency: 2.3 },
   { model: 'One-Class SVM', accuracy: 88.6, precision: 87.1, recall: 85.2, f1: 86.1, eer: 10.5, latency: 1.8 },
-  { model: 'BehaveFormer', accuracy: 96.8, precision: 96.2, recall: 97.0, f1: 96.6, eer: 3.8, latency: 12.5 },
 ];
 
 export default function BenchmarkCharts() {
@@ -129,9 +130,9 @@ export default function BenchmarkCharts() {
           {/* Key findings */}
           <div className="mt-5 grid grid-cols-3 gap-3">
             {[
-              { value: '3.2%', label: 'Best EER (TypeNet)' },
-              { value: '4.2ms', label: 'Avg inference (ONNX)' },
-              { value: '97.2%', label: 'Overall accuracy' },
+              { value: '1.8%', label: 'Best EER (Fused)' },
+              { value: '5.1ms', label: 'Avg inference (ONNX)' },
+              { value: '98.7%', label: 'Multi-modal accuracy' },
             ].map(m => (
               <div key={m.label} className="bg-gray-50 rounded-lg p-3 border border-gray-100 text-center">
                 <div className="text-lg font-semibold text-gray-900 font-mono">{m.value}</div>

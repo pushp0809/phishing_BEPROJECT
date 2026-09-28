@@ -6,15 +6,18 @@ import Architecture from './components/Architecture';
 import FeatureExtraction from './components/FeatureExtraction';
 import ModelArchitecture from './components/ModelArchitecture';
 import KeystrokeDemo from './components/KeystrokeDemo';
+import MouseDemo from './components/MouseDemo';
 import TrustScore from './components/TrustScore';
 import BenchmarkCharts from './components/BenchmarkCharts';
 import ApiDemo from './components/ApiDemo';
 import Datasets from './components/Datasets';
+import { MousePointer2 } from 'lucide-react';
 
 const sections = [
   { id: 'hero', label: 'Overview', icon: Shield },
   { id: 'architecture', label: 'How It Works', icon: Cpu },
-  { id: 'features', label: 'Features', icon: Keyboard },
+  { id: 'features', label: 'Keystroke', icon: Keyboard },
+  { id: 'mouse', label: 'Mouse', icon: MousePointer2 },
   { id: 'model', label: 'Model', icon: Cpu },
   { id: 'demo', label: 'Live Demo', icon: Keyboard },
   { id: 'trust', label: 'Trust Engine', icon: Server },
@@ -104,6 +107,7 @@ export default function App() {
         <Hero />
         <Architecture />
         <FeatureExtraction />
+        <MouseDemo />
         <ModelArchitecture />
         <KeystrokeDemo />
         <TrustScore />
