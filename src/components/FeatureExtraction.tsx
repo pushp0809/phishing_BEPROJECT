@@ -53,20 +53,14 @@ class KeystrokeFeatureExtractor:
         dwell = self.extract_dwell_time(raw_events)
         flights = self.extract_flight_times(raw_events)
         
-        # Combine features: [dwell, DD, UD]
         combined = np.column_stack([
             dwell.values[:-1],
             flights['DD'],
             flights['UD']
         ])
         
-        # Filter hesitation pauses
         filtered = self.filter_pauses(combined)
-        
-        # Normalize
         normalized = self.normalize(filtered)
-        
-        # Create sliding windows
         windows = self.create_windows(normalized)
         
         return windows  # Shape: (n_windows, window_size, n_features)`;
@@ -104,134 +98,115 @@ export default function FeatureExtraction() {
   const [activeTab, setActiveTab] = useState<'pipeline' | 'tests'>('pipeline');
 
   return (
-    <section id="features" className="py-24 px-4">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            <span className="gradient-text">Step 1: Feature Extraction</span>
+    <section id="features" className="py-20 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3 tracking-tight">
+            Feature Extraction Pipeline
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            Raw timing extraction pipeline — computing dwell times, flight times, and creating 
-            sliding windows suitable for LSTM/RNN time-series input
+          <p className="text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
+            Raw timing extraction — computing dwell times, flight times, and creating 
+            sliding windows suitable for LSTM input.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Feature visualization */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+        {/* Feature cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
           {[
             {
-              title: 'Dwell Time (Hold)',
+              title: 'Dwell Time',
               formula: 't_release − t_press',
-              desc: 'Duration a key is held down',
-              example: 'Key A: 145ms',
-              color: 'border-blue-500/30 bg-blue-500/5'
+              desc: 'How long a key is held down',
+              example: 'Key A: 145ms'
             },
             {
-              title: 'DD Flight Time',
+              title: 'DD Flight',
               formula: 't_press(n) − t_press(n-1)',
-              desc: 'Press-to-press latency between consecutive keys',
-              example: 'A→B: 210ms',
-              color: 'border-purple-500/30 bg-purple-500/5'
+              desc: 'Time between consecutive key presses',
+              example: 'A→B: 210ms'
             },
             {
-              title: 'UD Flight Time',
+              title: 'UD Flight',
               formula: 't_press(n) − t_release(n-1)',
-              desc: 'Release-to-press latency (digraph)',
-              example: 'A↑→B↓: 65ms',
-              color: 'border-cyan-500/30 bg-cyan-500/5'
+              desc: 'Release-to-next-press latency',
+              example: 'A↑→B↓: 65ms'
             }
-          ].map((feature, i) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className={`rounded-xl p-5 border ${feature.color}`}
-            >
-              <h4 className="font-semibold text-white text-sm mb-1">{feature.title}</h4>
-              <code className="text-xs text-indigo-300 block mb-2">{feature.formula}</code>
-              <p className="text-xs text-slate-400 mb-2">{feature.desc}</p>
-              <div className="text-xs text-slate-500 bg-slate-800/50 rounded px-2 py-1">
-                Example: {feature.example}
+          ].map((feature) => (
+            <div key={feature.title} className="card p-4">
+              <h4 className="font-medium text-gray-900 text-sm mb-1">{feature.title}</h4>
+              <code className="text-xs text-gray-500 block mb-2 font-mono">{feature.formula}</code>
+              <p className="text-xs text-gray-500 mb-2">{feature.desc}</p>
+              <div className="text-xs text-gray-400 bg-gray-50 rounded px-2 py-1 border border-gray-100">
+                {feature.example}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Code Block */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
-          <div className="flex gap-2 mb-3">
+        <div>
+          <div className="flex gap-1 mb-3">
             <button
               onClick={() => setActiveTab('pipeline')}
-              className={`px-4 py-2 rounded-lg text-sm transition-all ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 activeTab === 'pipeline'
-                  ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
               Pipeline Code
             </button>
             <button
               onClick={() => setActiveTab('tests')}
-              className={`px-4 py-2 rounded-lg text-sm transition-all ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 activeTab === 'tests'
-                  ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
               Unit Tests
             </button>
           </div>
 
-          <div className="code-block p-6 overflow-x-auto">
-            <pre className="text-sm leading-relaxed">
-              <code className="text-slate-300">
+          <div className="code-block p-5 overflow-x-auto">
+            <pre className="text-xs leading-relaxed">
+              <code className="text-gray-700">
                 {activeTab === 'pipeline' ? pythonCode : testCode}
               </code>
             </pre>
           </div>
-        </motion.div>
+        </div>
 
         {/* Window visualization */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-12 glass-card rounded-xl p-6"
+          className="mt-8 card p-5"
         >
-          <h4 className="font-semibold text-white mb-4">Sliding Window Construction (30-50 keystrokes)</h4>
-          <div className="flex gap-1 overflow-x-auto pb-2">
+          <h4 className="font-medium text-gray-900 text-sm mb-3">Sliding Window (30–50 keystrokes)</h4>
+          <div className="flex gap-0.5 overflow-x-auto pb-2">
             {Array.from({ length: 60 }, (_, i) => (
               <div
                 key={i}
-                className={`flex-shrink-0 w-8 h-8 rounded flex items-center justify-center text-[10px] font-mono ${
+                className={`flex-shrink-0 w-7 h-7 rounded flex items-center justify-center text-[10px] font-mono ${
                   i >= 10 && i < 50
-                    ? 'bg-indigo-500/30 border border-indigo-500/50 text-indigo-300'
-                    : 'bg-slate-800 border border-slate-700 text-slate-500'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-50 border border-gray-200 text-gray-400'
                 }`}
               >
                 {i}
               </div>
             ))}
           </div>
-          <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded bg-indigo-500/30 border border-indigo-500/50" />
-              Active window (40 keystrokes)
+          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-gray-900" />
+              Active window (40 keys)
             </span>
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded bg-slate-800 border border-slate-700" />
-              Outside window
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-gray-50 border border-gray-200" />
+              Outside
             </span>
           </div>
         </motion.div>

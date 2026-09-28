@@ -9,16 +9,14 @@ export default function TrustScore() {
   const [history, setHistory] = useState<{ score: number; similarity: number; status: string }[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const trustScoreRef = useRef(trustScore);
-  const lambda = 0.7; // EMA decay factor
+  const lambda = 0.7;
 
-  // Keep ref in sync
   useEffect(() => {
     trustScoreRef.current = trustScore;
   }, [trustScore]);
 
   const simulateVerification = () => {
-    // Simulate cosine similarity (genuine user: 0.7-0.95, impostor: 0.2-0.5)
-    const isImpostor = Math.random() < 0.15; // 15% chance of impostor
+    const isImpostor = Math.random() < 0.15;
     const similarity = isImpostor 
       ? 0.2 + Math.random() * 0.3 
       : 0.7 + Math.random() * 0.25;
@@ -52,157 +50,141 @@ export default function TrustScore() {
   };
 
   const getStatus = (score: number) => {
-    if (score > 0.6) return { label: 'ALLOW', color: 'text-emerald-400', bg: 'bg-emerald-500/10', icon: CheckCircle };
-    if (score > 0.4) return { label: 'CHALLENGE', color: 'text-amber-400', bg: 'bg-amber-500/10', icon: AlertTriangle };
-    return { label: 'FLAGGED', color: 'text-red-400', bg: 'bg-red-500/10', icon: XCircle };
+    if (score > 0.6) return { label: 'ALLOW', badge: 'badge-success', icon: CheckCircle };
+    if (score > 0.4) return { label: 'CHALLENGE', badge: 'badge-warning', icon: AlertTriangle };
+    return { label: 'FLAGGED', badge: 'badge-danger', icon: XCircle };
   };
 
   const status = getStatus(trustScore);
   const StatusIcon = status.icon;
 
   return (
-    <section id="trust" className="py-24 px-4">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            <span className="gradient-text">Step 4: Trust Score Engine</span>
+    <section id="trust" className="py-20 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3 tracking-tight">
+            Trust Score Engine
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
+          <p className="text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
             Exponential Moving Average (EMA) decaying trust score — combines historical confidence 
-            with real-time similarity measurements
+            with real-time similarity measurements.
           </p>
-        </motion.div>
+        </div>
 
         {/* Formula */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="glass-card rounded-xl p-6 mb-8 text-center"
+          className="card p-5 mb-6 text-center"
         >
-          <p className="text-sm text-slate-400 mb-2">Decaying Trust Score Equation</p>
-          <div className="text-xl font-mono text-indigo-300">
+          <p className="text-xs text-gray-500 mb-2">Decaying Trust Score Equation</p>
+          <div className="text-base font-mono text-gray-900">
             Trust<sub>t</sub> = λ · Trust<sub>t-1</sub> + (1 - λ) · Similarity<sub>t</sub>
           </div>
-          <p className="text-xs text-slate-500 mt-2">λ = {lambda} (higher = more weight on history, slower adaptation)</p>
+          <p className="text-xs text-gray-400 mt-2">λ = {lambda} (higher = more weight on history)</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Trust Gauge */}
-          <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center">
-            <Shield className={`w-8 h-8 mb-4 ${status.color}`} />
+          <div className="card p-5 flex flex-col items-center justify-center">
+            <Shield className="w-6 h-6 text-gray-400 mb-3" />
             
-            {/* Circular gauge */}
-            <div className="relative w-40 h-40 mb-4">
+            <div className="relative w-36 h-36 mb-3">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6" className="text-slate-700" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#f3f4f6" strokeWidth="6" />
                 <circle
                   cx="50" cy="50" r="42" fill="none" strokeWidth="6"
-                  stroke={trustScore > 0.6 ? '#10b981' : trustScore > 0.4 ? '#f59e0b' : '#ef4444'}
+                  stroke="#111827"
                   strokeLinecap="round"
                   strokeDasharray={`${trustScore * 264} 264`}
                   className="transition-all duration-500"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold text-white">{(trustScore * 100).toFixed(0)}%</span>
-                <span className="text-xs text-slate-400">Trust</span>
+                <span className="text-2xl font-semibold text-gray-900">{(trustScore * 100).toFixed(0)}%</span>
+                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Trust</span>
               </div>
             </div>
 
-            <div className={`px-4 py-2 rounded-full ${status.bg} ${status.color} flex items-center gap-2`}>
-              <StatusIcon className="w-4 h-4" />
-              <span className="font-semibold text-sm">{status.label}</span>
-            </div>
+            <span className={`badge ${status.badge} mb-4`}>
+              <StatusIcon className="w-3 h-3" />
+              {status.label}
+            </span>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2">
               <button
                 onClick={() => setIsRunning(!isRunning)}
-                className={`px-4 py-2 rounded-lg text-sm transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
                   isRunning
-                    ? 'bg-red-500/20 border border-red-500/30 text-red-300'
-                    : 'bg-indigo-500/20 border border-indigo-500/30 text-indigo-300'
+                    ? 'bg-red-50 text-red-700 border border-red-200'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
                 }`}
               >
-                {isRunning ? 'Pause' : 'Start Simulation'}
+                {isRunning ? 'Pause' : 'Start'}
               </button>
               <button
                 onClick={reset}
-                className="px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-300 text-sm hover:bg-slate-700 transition"
+                className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 text-xs font-medium hover:bg-gray-50 transition"
               >
                 Reset
               </button>
             </div>
           </div>
 
-          {/* Similarity Timeline */}
-          <div className="glass-card rounded-2xl p-6 lg:col-span-2">
-            <h3 className="font-semibold text-white mb-4">Similarity & Trust Timeline</h3>
+          {/* Timeline */}
+          <div className="card p-5 lg:col-span-2">
+            <h3 className="font-medium text-gray-900 text-sm mb-3">Similarity & Trust Timeline</h3>
             
-            {/* Chart */}
-            <div className="relative h-48 mb-4">
-              <svg className="w-full h-full" viewBox="0 0 500 150" preserveAspectRatio="none">
-                {/* Threshold lines */}
-                <line x1="0" y1="60" x2="500" y2="60" stroke="#10b981" strokeWidth="0.5" strokeDasharray="4" opacity="0.5" />
-                <line x1="0" y1="90" x2="500" y2="90" stroke="#f59e0b" strokeWidth="0.5" strokeDasharray="4" opacity="0.5" />
+            <div className="relative h-40 mb-3">
+              <svg className="w-full h-full" viewBox="0 0 500 140" preserveAspectRatio="none">
+                <line x1="0" y1="56" x2="500" y2="56" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                <line x1="0" y1="84" x2="500" y2="84" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
                 
-                {/* Labels */}
-                <text x="505" y="63" fill="#10b981" fontSize="8" className="hidden">ALLOW</text>
-                
-                {/* Similarity line */}
                 {similarities.length > 1 && (
                   <polyline
                     fill="none"
-                    stroke="#6366f1"
+                    stroke="#d1d5db"
                     strokeWidth="1.5"
-                    opacity="0.6"
                     points={similarities.map((s, i) => 
-                      `${(i / Math.max(1, similarities.length - 1)) * 490 + 5},${(1 - s) * 140 + 5}`
+                      `${(i / Math.max(1, similarities.length - 1)) * 490 + 5},${(1 - s) * 130 + 5}`
                     ).join(' ')}
                   />
                 )}
                 
-                {/* Trust score line */}
                 {history.length > 1 && (
                   <polyline
                     fill="none"
-                    stroke={trustScore > 0.6 ? '#10b981' : trustScore > 0.4 ? '#f59e0b' : '#ef4444'}
+                    stroke="#111827"
                     strokeWidth="2"
                     points={history.map((h, i) => 
-                      `${(i / Math.max(1, history.length - 1)) * 490 + 5},${(1 - h.score) * 140 + 5}`
+                      `${(i / Math.max(1, history.length - 1)) * 490 + 5},${(1 - h.score) * 130 + 5}`
                     ).join(' ')}
                   />
                 )}
               </svg>
               
-              {/* Legend */}
               <div className="absolute top-2 right-2 flex gap-3 text-[10px]">
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-0.5 bg-indigo-500 inline-block" /> Similarity
+                <span className="flex items-center gap-1 text-gray-500">
+                  <span className="w-3 h-0.5 bg-gray-300 inline-block" /> Similarity
                 </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-0.5 bg-emerald-500 inline-block" /> Trust Score
+                <span className="flex items-center gap-1 text-gray-700">
+                  <span className="w-3 h-0.5 bg-gray-900 inline-block" /> Trust
                 </span>
               </div>
             </div>
 
-            {/* Recent events */}
-            <div className="border-t border-slate-700 pt-4">
-              <h4 className="text-xs text-slate-400 mb-2">Recent Verification Events</h4>
-              <div className="space-y-1 max-h-32 overflow-y-auto">
+            <div className="border-t border-gray-100 pt-3">
+              <h4 className="text-[11px] text-gray-500 mb-2 font-medium">Recent Events</h4>
+              <div className="space-y-1 max-h-28 overflow-y-auto">
                 {history.slice(-8).reverse().map((h, i) => {
                   const s = getStatus(h.score);
                   return (
-                    <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-slate-800/50">
-                      <span className="text-slate-400">#{history.length - i}</span>
-                      <span className="text-slate-300">sim: {h.similarity.toFixed(3)}</span>
-                      <span className="text-slate-300">trust: {(h.score * 100).toFixed(1)}%</span>
-                      <span className={`px-2 py-0.5 rounded ${s.bg} ${s.color} font-medium`}>
+                    <div key={i} className="flex items-center justify-between text-xs py-1.5 px-2 rounded bg-gray-50 border border-gray-100">
+                      <span className="text-gray-400 font-mono text-[10px]">#{history.length - i}</span>
+                      <span className="text-gray-600 font-mono text-[11px]">sim: {h.similarity.toFixed(2)}</span>
+                      <span className="text-gray-600 font-mono text-[11px]">trust: {(h.score * 100).toFixed(0)}%</span>
+                      <span className={`badge ${s.badge} text-[10px]`}>
                         {h.status}
                       </span>
                     </div>
@@ -213,16 +195,16 @@ export default function TrustScore() {
           </div>
         </div>
 
-        {/* API Response Preview */}
+        {/* API Response */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-8 code-block p-4"
+          className="mt-6 code-block p-4"
         >
-          <div className="text-xs text-slate-500 mb-2">API Response:</div>
-          <pre className="text-sm">
-            <code className="text-slate-300">{`{
+          <div className="text-[10px] text-gray-400 mb-2 font-medium">API Response:</div>
+          <pre className="text-xs">
+            <code className="text-gray-700">{`{
   "status": "${status.label}",
   "current_risk_score": ${(1 - trustScore).toFixed(4)},
   "trust_score": ${trustScore.toFixed(4)},
