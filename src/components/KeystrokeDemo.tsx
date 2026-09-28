@@ -1,12 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Keyboard, Clock, Timer, Activity, Lock, Eye, EyeOff } from 'lucide-react';
+import { Keyboard, Clock, Lock, Eye, EyeOff, Timer, Activity } from 'lucide-react';
 
 interface KeystrokeEvent {
   key: string;
   type: 'keydown' | 'keyup';
   timestamp: number;
-  masked: boolean;
 }
 
 interface TimingFeature {
@@ -23,7 +22,6 @@ export default function KeystrokeDemo() {
   const [showKeys, setShowKeys] = useState(false);
   const [backspaceCount, setBackspaceCount] = useState(0);
   const [pasteCount, setPasteCount] = useState(0);
-  const [blurCount, setBlurCount] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const keyDownMap = useRef<Map<string, number>>(new Map());
   const lastKeyDown = useRef<number>(0);
@@ -36,16 +34,13 @@ export default function KeystrokeDemo() {
     const now = performance.now();
     const key = e.key;
     
-    if (key === 'Backspace') {
-      setBackspaceCount(c => c + 1);
-    }
+    if (key === 'Backspace') setBackspaceCount(c => c + 1);
     
     keyDownMap.current.set(key, now);
     const ddFlight = lastKeyDown.current > 0 ? now - lastKeyDown.current : null;
     lastKeyDown.current = now;
     
-    setEvents(prev => [...prev, { key, type: 'keydown', timestamp: now, masked: !showKeys }]);
-    
+    setEvents(prev => [...prev, { key, type: 'keydown', timestamp: now }]);
     setFeatures(prev => [...prev, {
       key: showKeys ? key : '•',
       dwell: null,
@@ -65,9 +60,7 @@ export default function KeystrokeDemo() {
     lastKeyUp.current = now;
     keyDownMap.current.delete(key);
     
-    setEvents(prev => [...prev, { key, type: 'keyup', timestamp: now, masked: !showKeys }]);
-    
-    // Update last feature with dwell time
+    setEvents(prev => [...prev, { key, type: 'keyup', timestamp: now }]);
     setFeatures(prev => {
       const updated = [...prev];
       for (let i = updated.length - 1; i >= 0; i--) {
@@ -84,27 +77,16 @@ export default function KeystrokeDemo() {
     if (isRecording) setPasteCount(c => c + 1);
   }, [isRecording]);
 
-  useEffect(() => {
-    const handleBlur = () => {
-      if (isRecording) setBlurCount(c => c + 1);
-    };
-    window.addEventListener('blur', handleBlur);
-    return () => window.removeEventListener('blur', handleBlur);
-  }, [isRecording]);
-
   const startRecording = () => {
     setEvents([]);
     setFeatures([]);
     setBackspaceCount(0);
     setPasteCount(0);
-    setBlurCount(0);
     setIsRecording(true);
     setTimeout(() => inputRef.current?.focus(), 100);
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
-  };
+  const stopRecording = () => setIsRecording(false);
 
   const avgDwell = features.filter(f => f.dwell !== null).reduce((s, f) => s + (f.dwell || 0), 0) / 
     Math.max(1, features.filter(f => f.dwell !== null).length);
@@ -112,141 +94,129 @@ export default function KeystrokeDemo() {
     Math.max(1, features.filter(f => f.ddFlight !== null).length);
 
   return (
-    <section id="demo" className="py-24 px-4">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            <span className="gradient-text">Step 3: Live Keystroke Capture</span>
+    <section id="demo" className="py-20 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3 tracking-tight">
+            Live Keystroke Capture
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            Interactive demonstration of privacy-first keystroke telemetry — type below to see 
-            real-time timing feature extraction (characters are masked by default)
+          <p className="text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
+            Interactive demonstration of privacy-first keystroke telemetry. Characters are masked by default — only timing data is captured.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Input Area */}
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-white flex items-center gap-2">
-                <Keyboard className="w-4 h-4 text-indigo-400" />
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-medium text-gray-900 text-sm flex items-center gap-2">
+                <Keyboard className="w-4 h-4 text-gray-400" />
                 Typing Area
               </h3>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowKeys(!showKeys)}
-                  className="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition"
-                  title={showKeys ? 'Mask characters' : 'Show characters'}
-                >
-                  {showKeys ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                </button>
-              </div>
+              <button
+                onClick={() => setShowKeys(!showKeys)}
+                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+                title={showKeys ? 'Mask characters' : 'Show characters'}
+              >
+                {showKeys ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              </button>
             </div>
 
             <input
               ref={inputRef}
               type={showKeys ? 'text' : 'password'}
-              placeholder={isRecording ? 'Start typing...' : 'Click Start to begin recording'}
+              placeholder={isRecording ? 'Start typing...' : 'Click Start to begin'}
               disabled={!isRecording}
               onKeyDown={handleKeyDown}
               onKeyUp={handleKeyUp}
               onPaste={handlePaste}
-              className="w-full px-4 py-3 rounded-lg bg-slate-800/80 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 disabled:opacity-50"
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-300 focus:ring-2 focus:ring-gray-100 disabled:bg-gray-50 disabled:text-gray-400 text-sm transition-all"
             />
 
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-2 mt-3">
               <button
                 onClick={startRecording}
-                className="flex-1 px-4 py-2 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-sm hover:bg-indigo-500/30 transition"
+                className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  isRecording
+                    ? 'bg-gray-100 text-gray-500 border border-gray-200'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
+                }`}
               >
                 {isRecording ? '● Recording...' : 'Start Recording'}
               </button>
               <button
                 onClick={stopRecording}
                 disabled={!isRecording}
-                className="flex-1 px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-300 text-sm hover:bg-slate-700 transition disabled:opacity-50"
+                className="flex-1 px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition disabled:opacity-50"
               >
                 Stop
               </button>
             </div>
 
             {/* Metrics */}
-            <div className="grid grid-cols-2 gap-3 mt-6">
-              <div className="bg-slate-800/50 rounded-lg p-3">
-                <div className="text-[10px] text-slate-500 uppercase tracking-wider">Total Events</div>
-                <div className="text-lg font-bold text-white">{events.length}</div>
-              </div>
-              <div className="bg-slate-800/50 rounded-lg p-3">
-                <div className="text-[10px] text-slate-500 uppercase tracking-wider">Avg Dwell</div>
-                <div className="text-lg font-bold text-cyan-300">{avgDwell.toFixed(1)}ms</div>
-              </div>
-              <div className="bg-slate-800/50 rounded-lg p-3">
-                <div className="text-[10px] text-slate-500 uppercase tracking-wider">Avg DD Flight</div>
-                <div className="text-lg font-bold text-purple-300">{avgDD.toFixed(1)}ms</div>
-              </div>
-              <div className="bg-slate-800/50 rounded-lg p-3">
-                <div className="text-[10px] text-slate-500 uppercase tracking-wider">Backspaces</div>
-                <div className="text-lg font-bold text-amber-300">{backspaceCount}</div>
-              </div>
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              {[
+                { label: 'Events', value: events.length },
+                { label: 'Avg Dwell', value: `${avgDwell.toFixed(0)}ms` },
+                { label: 'Avg DD', value: `${avgDD.toFixed(0)}ms` },
+                { label: 'Backspaces', value: backspaceCount },
+              ].map(m => (
+                <div key={m.label} className="bg-gray-50 rounded-lg p-2.5 border border-gray-100">
+                  <div className="text-[10px] text-gray-400 uppercase tracking-wider">{m.label}</div>
+                  <div className="text-base font-semibold text-gray-900 font-mono">{m.value}</div>
+                </div>
+              ))}
             </div>
 
             {/* Privacy indicators */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">
-                <Lock className="w-3 h-3 text-emerald-400" />
-                <span className="text-[10px] text-emerald-300">Characters masked</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-blue-500/10 border border-blue-500/20">
-                <Timer className="w-3 h-3 text-blue-400" />
-                <span className="text-[10px] text-blue-300">Only timings sent</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20">
-                <Activity className="w-3 h-3 text-amber-400" />
-                <span className="text-[10px] text-amber-300">Pastes: {pasteCount} | Blurs: {blurCount}</span>
-              </div>
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              <span className="badge badge-success">
+                <Lock className="w-3 h-3" /> Characters masked
+              </span>
+              <span className="badge badge-accent">
+                <Timer className="w-3 h-3" /> Only timings
+              </span>
+              <span className="badge">
+                <Activity className="w-3 h-3" /> Pastes: {pasteCount}
+              </span>
             </div>
           </div>
 
           {/* Feature Timeline */}
-          <div className="glass-card rounded-2xl p-6">
-            <h3 className="font-semibold text-white flex items-center gap-2 mb-4">
-              <Clock className="w-4 h-4 text-indigo-400" />
+          <div className="card p-5">
+            <h3 className="font-medium text-gray-900 text-sm flex items-center gap-2 mb-3">
+              <Clock className="w-4 h-4 text-gray-400" />
               Extracted Features (last 15)
             </h3>
             
-            <div className="overflow-auto max-h-[400px]">
-              <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-slate-800">
-                  <tr className="text-slate-400">
-                    <th className="text-left py-2 px-2">Key</th>
-                    <th className="text-right py-2 px-2">Dwell (ms)</th>
-                    <th className="text-right py-2 px-2">DD (ms)</th>
-                    <th className="text-right py-2 px-2">UD (ms)</th>
+            <div className="overflow-auto max-h-[320px] rounded-lg border border-gray-100">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Key</th>
+                    <th className="text-right">Dwell</th>
+                    <th className="text-right">DD</th>
+                    <th className="text-right">UD</th>
                   </tr>
                 </thead>
                 <tbody>
                   {features.slice(-15).map((f, i) => (
-                    <tr key={i} className="border-t border-slate-700/50 hover:bg-white/5">
-                      <td className="py-1.5 px-2 font-mono text-indigo-300">{f.key}</td>
-                      <td className="py-1.5 px-2 text-right text-cyan-300">
-                        {f.dwell !== null ? f.dwell.toFixed(1) : '—'}
+                    <tr key={i}>
+                      <td className="font-mono text-gray-700">{f.key}</td>
+                      <td className="text-right font-mono text-gray-600">
+                        {f.dwell !== null ? `${f.dwell.toFixed(0)}` : '—'}
                       </td>
-                      <td className="py-1.5 px-2 text-right text-purple-300">
-                        {f.ddFlight !== null ? f.ddFlight.toFixed(1) : '—'}
+                      <td className="text-right font-mono text-gray-500">
+                        {f.ddFlight !== null ? `${f.ddFlight.toFixed(0)}` : '—'}
                       </td>
-                      <td className="py-1.5 px-2 text-right text-emerald-300">
-                        {f.udFlight !== null ? f.udFlight.toFixed(1) : '—'}
+                      <td className="text-right font-mono text-gray-500">
+                        {f.udFlight !== null ? `${f.udFlight.toFixed(0)}` : '—'}
                       </td>
                     </tr>
                   ))}
                   {features.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="py-8 text-center text-slate-500">
+                      <td colSpan={4} className="py-8 text-center text-gray-400 text-xs">
                         Start typing to see features...
                       </td>
                     </tr>
@@ -257,18 +227,18 @@ export default function KeystrokeDemo() {
 
             {/* Dwell time bar chart */}
             {features.filter(f => f.dwell !== null).length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-xs text-slate-400 mb-2">Dwell Time Distribution</h4>
-                <div className="flex items-end gap-0.5 h-16">
+              <div className="mt-4">
+                <h4 className="text-[11px] text-gray-500 mb-2 font-medium">Dwell Time Distribution</h4>
+                <div className="flex items-end gap-0.5 h-14">
                   {features.filter(f => f.dwell !== null).slice(-30).map((f, i) => {
                     const maxDwell = Math.max(...features.filter(x => x.dwell).map(x => x.dwell || 0));
                     const height = ((f.dwell || 0) / maxDwell) * 100;
                     return (
                       <div
                         key={i}
-                        className="flex-1 rounded-t bg-gradient-to-t from-indigo-500 to-cyan-400 min-w-[3px]"
+                        className="flex-1 rounded-t bg-gray-900 min-w-[3px] opacity-60 hover:opacity-100 transition-opacity"
                         style={{ height: `${Math.max(4, height)}%` }}
-                        title={`${f.dwell?.toFixed(1)}ms`}
+                        title={`${f.dwell?.toFixed(0)}ms`}
                       />
                     );
                   })}

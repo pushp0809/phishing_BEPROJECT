@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 const modelCode = `import torch
 import torch.nn as nn
@@ -34,10 +35,8 @@ class TypeNetEmbedder(nn.Module):
         returns: (batch, embed_dim) normalized embedding
         """
         lstm_out, (h_n, _) = self.lstm(x)
-        # Use last hidden state
         last_hidden = h_n[-1]  # (batch, hidden_dim)
         embedding = self.projection(last_hidden)
-        # L2 normalize for cosine similarity
         return F.normalize(embedding, p=2, dim=1)
 
 
@@ -65,9 +64,6 @@ class KeystrokeVerifier:
         self.optimizer = torch.optim.Adam(
             self.model.parameters(), lr=1e-3, weight_decay=1e-5
         )
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            self.optimizer, T_max=100
-        )
     
     def train_step(self, anchor, positive, negative):
         self.model.train()
@@ -94,12 +90,11 @@ class KeystrokeVerifier:
         
         far_list, frr_list = [], []
         for t in thresholds:
-            far = np.mean(genuine_scores < t)   # False Accept
-            frr = np.mean(impostor_scores >= t)  # False Reject
+            far = np.mean(genuine_scores < t)
+            frr = np.mean(impostor_scores >= t)
             far_list.append(far)
             frr_list.append(frr)
         
-        # EER: where FAR = FRR
         fn = interp1d(far_list, frr_list)
         eer = brentq(lambda x: x - fn(x), 0, 1)
         return eer`;
@@ -131,132 +126,98 @@ export default function ModelArchitecture() {
   const [activeTab, setActiveTab] = useState<'model' | 'config'>('model');
 
   return (
-    <section id="model" className="py-24 px-4">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            <span className="gradient-text">Step 2: Model Architecture</span>
+    <section id="model" className="py-20 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3 tracking-tight">
+            Model Architecture
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
+          <p className="text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
             Siamese LSTM network with Triplet Margin Loss — generating 64-dimensional 
-            embedding vectors optimized for user discrimination
+            embedding vectors optimized for user discrimination.
           </p>
-        </motion.div>
+        </div>
 
         {/* Model Diagram */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="glass-card rounded-2xl p-8 mb-12"
+          className="card p-6 mb-8"
         >
-          <h3 className="text-center font-semibold text-white mb-8">TypeNet Architecture</h3>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-            {/* Input */}
-            <div className="text-center">
-              <div className="w-32 h-20 rounded-lg bg-blue-500/10 border border-blue-500/30 flex flex-col items-center justify-center">
-                <span className="text-xs text-blue-300 font-medium">Input</span>
-                <span className="text-[10px] text-slate-400">(batch, 40, 3)</span>
-                <span className="text-[10px] text-slate-500">[dwell, DD, UD]</span>
+          <h3 className="text-center font-medium text-gray-900 mb-6 text-sm">TypeNet Architecture</h3>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            {[
+              { label: 'Input', sub: '(batch, 40, 3)', detail: '[dwell, DD, UD]' },
+              { label: '2-Layer LSTM', sub: 'hidden=128', detail: 'dropout=0.3' },
+              { label: 'Projection', sub: '128 → 64', detail: 'ReLU + Dropout' },
+              { label: 'Embedding', sub: '64-dim', detail: 'L2 normalized' },
+            ].map((step, i, arr) => (
+              <div key={step.label} className="flex items-center gap-3">
+                <div className="text-center">
+                  <div className="w-28 h-16 rounded-lg border border-gray-200 bg-gray-50 flex flex-col items-center justify-center px-2">
+                    <span className="text-xs font-medium text-gray-900">{step.label}</span>
+                    <span className="text-[10px] text-gray-500 mt-0.5">{step.sub}</span>
+                    <span className="text-[10px] text-gray-400">{step.detail}</span>
+                  </div>
+                </div>
+                {i < arr.length - 1 && (
+                  <ArrowRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                )}
               </div>
-            </div>
-            
-            <span className="text-indigo-400 text-xl">→</span>
-            
-            {/* LSTM */}
-            <div className="text-center">
-              <div className="w-36 h-20 rounded-lg bg-purple-500/10 border border-purple-500/30 flex flex-col items-center justify-center">
-                <span className="text-xs text-purple-300 font-medium">2-Layer LSTM</span>
-                <span className="text-[10px] text-slate-400">hidden=128</span>
-                <span className="text-[10px] text-slate-500">dropout=0.3</span>
-              </div>
-            </div>
-            
-            <span className="text-indigo-400 text-xl">→</span>
-            
-            {/* Projection */}
-            <div className="text-center">
-              <div className="w-32 h-20 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex flex-col items-center justify-center">
-                <span className="text-xs text-cyan-300 font-medium">Projection</span>
-                <span className="text-[10px] text-slate-400">128→64→64</span>
-                <span className="text-[10px] text-slate-500">ReLU + Dropout</span>
-              </div>
-            </div>
-            
-            <span className="text-indigo-400 text-xl">→</span>
-            
-            {/* Embedding */}
-            <div className="text-center">
-              <div className="w-32 h-20 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex flex-col items-center justify-center">
-                <span className="text-xs text-emerald-300 font-medium">Embedding</span>
-                <span className="text-[10px] text-slate-400">64-dim vector</span>
-                <span className="text-[10px] text-slate-500">L2 normalized</span>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Triplet Loss visualization */}
-          <div className="mt-8 pt-6 border-t border-slate-700">
-            <h4 className="text-center text-sm font-medium text-slate-300 mb-4">Triplet Loss Optimization</h4>
-            <div className="flex justify-center gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-indigo-500/20 border-2 border-indigo-500/50 flex items-center justify-center mx-auto mb-2">
-                  <span className="text-xs text-indigo-300">A</span>
+          {/* Triplet Loss */}
+          <div className="mt-6 pt-6 border-t border-gray-100">
+            <h4 className="text-center text-xs font-medium text-gray-500 mb-4 uppercase tracking-wider">Triplet Loss Optimization</h4>
+            <div className="flex justify-center gap-6">
+              {[
+                { label: 'Anchor', letter: 'A', color: 'border-gray-900 bg-gray-50 text-gray-900' },
+                { label: 'Positive', letter: 'P', color: 'border-gray-400 bg-gray-50 text-gray-600' },
+                { label: 'Negative', letter: 'N', color: 'border-gray-300 bg-gray-50 text-gray-400' },
+              ].map(({ label, letter, color }) => (
+                <div key={label} className="text-center">
+                  <div className={`w-12 h-12 rounded-full border-2 ${color} flex items-center justify-center mx-auto mb-1.5`}>
+                    <span className="text-xs font-medium">{letter}</span>
+                  </div>
+                  <span className="text-[10px] text-gray-500">{label}</span>
                 </div>
-                <span className="text-[10px] text-slate-400">Anchor</span>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <div className="text-[10px] text-emerald-400 mb-1">d(A,P) ↓ minimize</div>
-                <div className="text-[10px] text-red-400">d(A,N) ↑ maximize</div>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500/50 flex items-center justify-center mx-auto mb-2">
-                  <span className="text-xs text-emerald-300">P</span>
-                </div>
-                <span className="text-[10px] text-slate-400">Positive</span>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500/50 flex items-center justify-center mx-auto mb-2">
-                  <span className="text-xs text-red-300">N</span>
-                </div>
-                <span className="text-[10px] text-slate-400">Negative</span>
-              </div>
+              ))}
             </div>
+            <p className="text-center text-xs text-gray-500 mt-3">
+              Minimize distance(A, P) · Maximize distance(A, N)
+            </p>
           </div>
         </motion.div>
 
         {/* Code */}
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-1 mb-3">
           <button
             onClick={() => setActiveTab('model')}
-            className={`px-4 py-2 rounded-lg text-sm transition-all ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
               activeTab === 'model'
-                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-gray-900 text-white'
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
             Model Implementation
           </button>
           <button
             onClick={() => setActiveTab('config')}
-            className={`px-4 py-2 rounded-lg text-sm transition-all ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
               activeTab === 'config'
-                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-gray-900 text-white'
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
             Hyperparameters
           </button>
         </div>
 
-        <div className="code-block p-6 overflow-x-auto">
-          <pre className="text-sm leading-relaxed">
-            <code className="text-slate-300">
+        <div className="code-block p-5 overflow-x-auto">
+          <pre className="text-xs leading-relaxed">
+            <code className="text-gray-700">
               {activeTab === 'model' ? modelCode : configCode}
             </code>
           </pre>

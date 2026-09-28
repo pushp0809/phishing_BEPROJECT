@@ -5,7 +5,7 @@ const datasets = [
   {
     name: 'TypeNet Architecture (BiDAlab)',
     url: 'https://github.com/BiDAlab/TypeNet',
-    description: 'Original implementation of the recurrent neural network designed for large-scale typing behavior recognition, including pre-calculated embedding vectors and LSTM layers.',
+    description: 'Original implementation of the recurrent neural network for large-scale typing behavior recognition, with pre-calculated embedding vectors and LSTM layers.',
     icon: KeyboardIcon,
     size: 'Pre-trained weights',
     users: 'Large-scale',
@@ -14,7 +14,7 @@ const datasets = [
   {
     name: 'CMU Keystroke Dynamics Benchmark',
     url: 'https://www.kaggle.com/datasets/carnegiecylab/keystroke-dynamics-benchmark-data-set',
-    description: 'The standard baseline dataset featuring keystroke-timing information from 51 subjects typing passwords 400 times each.',
+    description: 'Standard baseline dataset with keystroke-timing information from 51 subjects typing passwords 400 times each.',
     icon: Database,
     size: '51 users × 400 sessions',
     users: '51',
@@ -23,11 +23,11 @@ const datasets = [
   {
     name: 'CyberSignature Behaviour Biometrics',
     url: 'https://data.mendeley.com/datasets/fnf8b85kr6',
-    description: 'Contains 1,760 Keystroke, Mouse, and Touchscreen (KMT) dynamic instances for distinguishing legitimate online card payment entries from fraudulent ones.',
+    description: '1,760 Keystroke, Mouse, and Touchscreen (KMT) instances for distinguishing legitimate online card payments from fraudulent ones.',
     icon: Mouse,
     size: '1,760 instances',
     users: 'Multi-modal',
-    tags: ['KMT', 'Payments', 'Fraud Detection']
+    tags: ['KMT', 'Payments', 'Fraud']
   },
   {
     name: 'Balabit Mouse Dynamics Challenge',
@@ -39,36 +39,36 @@ const datasets = [
     tags: ['Mouse', 'Anomaly', 'Desktop']
   },
   {
-    name: 'Continuous Auth Service (tasoskakour)',
+    name: 'Continuous Auth Service',
     url: 'https://github.com/tasoskakour/continuous-authentication-service',
-    description: 'Open-source MEAN stack microservice backend utilizing One-Class SVMs and GMMs in Python to authenticate users continuously via keystroke dynamics.',
+    description: 'Open-source MEAN stack microservice using One-Class SVMs and GMMs to authenticate users continuously via keystroke dynamics.',
     icon: Database,
     size: 'Full pipeline',
     users: 'Open-source',
     tags: ['SVM', 'GMM', 'MEAN Stack']
   },
   {
-    name: 'BehaveFormer (Dual Attention Transformers)',
+    name: 'BehaveFormer (Dual Attention)',
     url: 'https://github.com/nganntk/BehaveFormer',
-    description: 'Advanced framework leveraging multichannel time-series data (keystrokes + swipe/IMU sensor data) for continuous identification using transformer architecture.',
+    description: 'Advanced framework leveraging multichannel time-series data (keystrokes + swipe/IMU) for continuous identification using transformers.',
     icon: KeyboardIcon,
     size: 'Transformer-based',
     users: 'Multi-sensor',
     tags: ['Transformer', 'Attention', 'Multi-modal']
   },
   {
-    name: 'Aalto 136M Keystrokes Dataset',
+    name: 'Aalto 136M Keystrokes',
     url: 'https://userinterfaces.aalto.fi/136Mkeystrokes/',
-    description: 'Massive dataset capturing free-text typing behaviors from 168,000 volunteers, ideal for establishing generalized typing baseline models.',
+    description: 'Massive dataset capturing free-text typing behaviors from 168,000 volunteers for generalized typing baseline models.',
     icon: Database,
-    size: '136 million keystrokes',
+    size: '136M keystrokes',
     users: '168,000',
     tags: ['Large-scale', 'Free-text', 'Baseline']
   },
   {
-    name: 'HuMIdb Dataset (Human Mobile Interaction)',
+    name: 'HuMIdb (Human Mobile Interaction)',
     url: 'https://github.com/BiDAlab/HuMIdb',
-    description: 'Contains multimodal data from 14 smartphone sensors captured during natural interactions by over 600 users.',
+    description: 'Multimodal data from 14 smartphone sensors captured during natural interactions by over 600 users.',
     icon: Users,
     size: '14 sensors × 600+ users',
     users: '600+',
@@ -78,58 +78,54 @@ const datasets = [
 
 export default function Datasets() {
   return (
-    <section id="datasets" className="py-24 px-4">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            <span className="gradient-text">Research Datasets & References</span>
+    <section id="datasets" className="py-20 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3 tracking-tight">
+            Research Datasets & References
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            Key datasets and open-source implementations used in behavioral biometrics research
+          <p className="text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
+            Key datasets and open-source implementations used in behavioral biometrics research.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {datasets.map((dataset, i) => (
             <motion.a
               key={dataset.name}
               href={dataset.url}
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-xl p-5 hover:border-indigo-500/40 transition-all group block"
+              transition={{ delay: i * 0.04 }}
+              className="card p-4 hover:border-gray-300 transition-all group block"
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/20 transition">
-                  <dataset.icon className="w-5 h-5 text-indigo-400" />
+                <div className="w-8 h-8 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 group-hover:bg-gray-900 group-hover:border-gray-900 transition-colors">
+                  <dataset.icon className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-white text-sm truncate group-hover:text-indigo-300 transition">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <h3 className="font-medium text-gray-900 text-sm truncate group-hover:text-gray-700 transition">
                       {dataset.name}
                     </h3>
-                    <ExternalLink className="w-3 h-3 text-slate-500 flex-shrink-0" />
+                    <ExternalLink className="w-3 h-3 text-gray-300 flex-shrink-0 group-hover:text-gray-500 transition-colors" />
                   </div>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-2">
                     {dataset.description}
                   </p>
-                  <div className="flex items-center gap-3 mt-3">
-                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                      <Users className="w-3 h-3" /> {dataset.users}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                      <Users className="w-2.5 h-2.5" /> {dataset.users}
                     </span>
-                    <span className="text-[10px] text-slate-500">{dataset.size}</span>
+                    <span className="text-[10px] text-gray-400">·</span>
+                    <span className="text-[10px] text-gray-400">{dataset.size}</span>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 mt-2">
+                  <div className="flex flex-wrap gap-1">
                     {dataset.tags.map(tag => (
-                      <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400">
+                      <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded bg-gray-50 border border-gray-100 text-gray-500">
                         {tag}
                       </span>
                     ))}
