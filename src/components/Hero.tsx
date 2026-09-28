@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Fingerprint, Zap, Lock, Shield, ArrowDown } from 'lucide-react';
+import { Fingerprint, Zap, Lock, Shield, ArrowDown, MousePointer2 } from 'lucide-react';
 
 export default function Hero() {
   return (
@@ -16,14 +16,14 @@ export default function Hero() {
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-gray-900 mb-5 tracking-tight leading-[1.1]">
-            Keystroke Dynamics
+            Behavioral Biometrics
             <br />
             <span className="text-gray-400">Authentication</span>
           </h1>
 
           <p className="text-base sm:text-lg text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
-            A complete pipeline for verifying who you are based on <em>how</em> you type — 
-            from raw keystroke capture to real-time trust scoring with deep learning.
+            A complete pipeline for verifying who you are based on <em>how</em> you type and move your mouse — 
+            from raw keystroke and mouse capture to real-time trust scoring with deep learning.
           </p>
         </motion.div>
 
@@ -34,7 +34,7 @@ export default function Hero() {
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto mb-12"
         >
           {[
-            { icon: Fingerprint, label: 'Capture', value: 'ms precision' },
+            { icon: Fingerprint, label: 'Keystroke + Mouse', value: 'ms precision' },
             { icon: Zap, label: 'LSTM', value: '64-dim embedding' },
             { icon: Lock, label: 'EER', value: '< 5%' },
             { icon: Shield, label: 'Decision', value: '< 5ms' },

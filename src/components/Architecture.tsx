@@ -224,6 +224,9 @@ export default function Architecture() {
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto leading-relaxed">
             Type a few words below. Watch your keystrokes flow through each stage of the authentication pipeline in real time.
+            <span className="block mt-2 text-xs text-gray-400">
+              💡 The system also captures mouse dynamics (see Mouse section below) for multi-modal authentication.
+            </span>
           </p>
         </div>
 
@@ -491,13 +494,18 @@ export default function Architecture() {
               num={4}
               title="Neural Network → Embedding Vector"
               icon={Cpu}
-              explanation="An LSTM network reads the sequence of keystrokes and compresses them into a compact 8-number fingerprint that captures your unique typing style."
+              explanation="An LSTM network reads the sequence of keystrokes (and mouse dynamics) and compresses them into a compact 8-number fingerprint that captures your unique behavioral style."
               defaultOpen={showDetails}
             >
               <div className="space-y-3">
                 <p className="text-sm text-gray-600 leading-relaxed">
                   The LSTM is a type of neural network designed for sequences — it reads your keystrokes one by one, building up an understanding of your rhythm. After processing all keys, it produces a single vector of 8 numbers. This vector is your "typing fingerprint." The same person typing the same text will produce a very similar vector each time.
                 </p>
+                <div className="bg-gray-50 border border-gray-100 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    <strong className="text-gray-900">🖱️ Mouse data integration:</strong> Mouse dynamics (velocity, acceleration, click patterns) are captured in parallel and concatenated with keystroke features before entering the LSTM. This creates a richer behavioral profile — an impostor would need to mimic both your typing rhythm and your mouse movements simultaneously.
+                  </p>
+                </div>
 
                 <div className="rounded-lg border border-gray-200 p-4 bg-gray-50/50">
                   <div className="text-xs text-gray-500 mb-2 font-medium">Your typing fingerprint (8 dimensions):</div>
